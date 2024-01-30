@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-image: url(/teacherWelcome.jpg);
+        }
+
+        #quiz-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            border-radius: 10px;
+        }
+
+        .question {
+            margin-bottom: 20px;
+        }
+
+        .options {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options label {
+            display: block;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #eee;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #progress {
+            height: 100%;
+            width: 100%;
+            background-color: #4caf50;
+            border-radius: 5px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <h1>Quiz App!</h1>
+    <div id="progress-bar">
+        <div id="progress"></div>
+    </div>
+    <div id="question-container" class="question"></div>
+    <ul id="options-container" class="options"></ul>
+    <div id="result"></div>
+    <button onclick="nextQuestion()">Next</button>
+</div>
+
+<script>
+    const quizData = [
+        {
+            question: "What is the capital of France?",
+            options: ["Berlin", "Madrid", "Paris", "Rome"],
+            correctAnswer: "Paris"
+        },
+        {
+            question: "Which planet is known as the Red Planet?",
+            options: ["Earth", "Mars", "Venus", "Jupiter"],
+            correctAnswer: "Mars"
+        },
+        {
+            question: "What is the largest mammal in the world?",
+            options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"],
+            correctAnswer: "Blue Whale"
+        },
+        {
+            question: 'Which programming language is often used for web development?',
+            options: ['Java', 'Python', 'JavaScript', 'C++'],
+            correctAnswer: 'JavaScript'
+
+        },
+        {
+        question: 'What is the largest ocean on Earth?',
+        options: ['Atlantic Ocean', 'Indian Ocean', 'Southern Ocean', 'Pacific Ocean'],
+        correctAnswer: 'Pacific Ocean'
+        },
+       {
+        question: 'Who painted the Mona Lisa?',
+        options: ['Vincent van Gogh', 'Leonardo da Vinci', 'Pablo Picasso', 'Claude Monet'],
+        correctAnswer: 'Leonardo da Vinci'
+       },
+       {
+        question: 'What is the capital of Japan?',
+        options: ['Beijing', 'Seoul', 'Tokyo', 'Bangkok'],
+        correctAnswer: 'Tokyo'
+       },
+       {
+        question: 'Which country is known as the Land of the Rising Sun?',
+        options: ['China', 'Japan', 'South Korea', 'Vietnam'],
+        correctAnswer: 'Japan'
+       }
+
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let timer;
+    const questionTime = 10; // Time in seconds for each question
+    let timeLeft = questionTime;
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        shuffleQuestions();
+        showQuestion();
+        startTimer();
+    }
+
+    function shuffleQuestions() {
+        quizData.sort(() => Math.random() - 0.5);
+    }
+
+    function showQuestion() {
+        const currentQuestion = quizData[currentQuestionIndex];
+        const questionContainer = document.getElementById("question-container");
+        const optionsContainer = document.getElementById("options-container");
+
+        questionContainer.innerHTML = currentQuestion.question;
+        optionsContainer.innerHTML = "";
+
+        currentQuestion.options.forEach((option, index) => {
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = "options";
+            input.id = `option${index + 1}`;
+            input.value = option;
+            
+            const label = document.createElement("label");
+            label.textContent = option;
+            label.setAttribute("for", `option${index + 1}`);
+            
+            optionsContainer.appendChild(input);
+            optionsContainer.appendChild(label);
+        });
+    }
+
+    function checkAnswer() {
+        const selectedOption = document.querySelector('input[name="options"]:checked');
+        if (selectedOption) {
+            const currentQuestion = quizData[currentQuestionIndex];
+
+            if (selectedOption.value === currentQuestion.correctAnswer) {
+                score++;
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+                resetTimer();
+            } else {
+                endQuiz();
+            }
+        }
+    }
+
+    function endQuiz() {
+        clearInterval(timer);
+        const resultContainer = document.getElementById("result");
+        resultContainer.textContent = `Your Score: ${score} out of ${quizData.length}`;
+    }
+
+    function startTimer() {
+        timeLeft = questionTime;
+
+        timer = setInterval(() => {
+            const progress = document.getElementById("progress");
+            progress.style.width = `${(timeLeft / questionTime) * 100}%`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizData.length) {
+                    showQuestion();
+                    resetTimer();
+                } else {
+                    endQuiz();
+                }
+            }
+
+            timeLeft--;
+        }, 1000);
+    }
+
+    function resetTimer() {
+        clearInterval(timer);
+        startTimer();
+    }
+
+    function nextQuestion() {
+        clearInterval(timer);
+        checkAnswer(); // Check if an option is selected before moving to the next question
+    }
+
+    // Start the quiz when the page loads
+    window.onload = startQuiz;
+</script>
+
+</body>
+</html>
